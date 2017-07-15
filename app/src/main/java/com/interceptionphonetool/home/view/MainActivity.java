@@ -15,6 +15,7 @@ import com.interceptionphonetool.home.entity.Phone;
 import com.interceptionphonetool.home.presenter.HomeContact;
 import com.interceptionphonetool.home.presenter.HomePresenterImpl;
 import com.interceptionphonetool.service.LocalService;
+import com.interceptionphonetool.service.RemoteService;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import io.reactivex.functions.Consumer;
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements HomeContact.HomeV
         mHomePresenter.attach(this);
         requestPermissions();
         startService(new Intent(this, LocalService.class));
+        startService(new Intent(this, RemoteService.class));
     }
 
     private void initView() {
