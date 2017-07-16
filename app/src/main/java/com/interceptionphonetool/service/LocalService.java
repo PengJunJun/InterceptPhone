@@ -16,6 +16,7 @@ import android.util.Log;
 import com.interceptionphonetool.R;
 import com.interceptionphonetool.binder.RemoteServiceBinder;
 import com.interceptionphonetool.home.entity.Phone;
+import com.interceptionphonetool.home.entity.Record;
 import com.interceptionphonetool.utils.DatabaseManager;
 import com.interceptionphonetool.utils.StringUtils;
 
@@ -36,7 +37,7 @@ public class LocalService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        bindService(new Intent(LocalService.this, RemoteService.class), mServiceConnect, Context.BIND_IMPORTANT);
+        bindService(new Intent(this, RemoteService.class), mServiceConnect, Context.BIND_IMPORTANT);
     }
 
     private void listenerTelephony() {
@@ -70,6 +71,7 @@ public class LocalService extends Service {
                         Log.e(TAG, "need interception");
                         finishCall();
                         sendNotification(incomingNumber);
+                        addRecord(incomingNumber);
                     }
                     break;
             }
@@ -110,6 +112,12 @@ public class LocalService extends Service {
         notification.flags = Notification.FLAG_AUTO_CANCEL;
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(NOTIFICATION_ID, notification);
+    }
+
+    private void addRecord(String number){
+        Record record = new Record();
+        record.setNumber(number);
+        DatabaseManager.getInstance().insertRecord(record);
     }
 
     private ServiceConnection mServiceConnect = new ServiceConnection() {

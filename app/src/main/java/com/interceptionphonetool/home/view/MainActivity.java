@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.interceptionphonetool.R;
@@ -16,15 +17,18 @@ import com.interceptionphonetool.home.presenter.HomeContact;
 import com.interceptionphonetool.home.presenter.HomePresenterImpl;
 import com.interceptionphonetool.service.LocalService;
 import com.interceptionphonetool.service.RemoteService;
+import com.interceptionphonetool.utils.statusbar.StatusBarActivity;
+import com.interceptionphonetool.utils.statusbar.StatusBarManager;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import io.reactivex.functions.Consumer;
 
-public class MainActivity extends AppCompatActivity implements HomeContact.HomeView {
+public class MainActivity extends StatusBarActivity implements HomeContact.HomeView {
     private static final String TAG = "MainActivity";
     private HomeContact.HomePresenter mHomePresenter;
     private Button mBtnAddPhone;
     private EditText mEtPhoneNumber;
+    private TextView mTvSearchRecord;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements HomeContact.HomeV
     private void initView() {
         mBtnAddPhone = (Button) findViewById(R.id.btn_add_phone);
         mEtPhoneNumber = (EditText) findViewById(R.id.et_phone_number);
+        mTvSearchRecord = (TextView) findViewById(R.id.tv_search_record);
         mBtnAddPhone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -49,6 +54,13 @@ public class MainActivity extends AppCompatActivity implements HomeContact.HomeV
                     phone.setNumber(mEtPhoneNumber.getText().toString());
                     mHomePresenter.addInterceptionPhone(phone);
                 }
+            }
+        });
+        mTvSearchRecord.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, RecordListActivity.class);
+                startActivity(intent);
             }
         });
     }
