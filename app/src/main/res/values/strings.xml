@@ -6,4 +6,7 @@
     <string name="sure">确认</string>
     <string name="has_interception">已拦截电话%1$s</string>
     <string name="interception_notification">拦截通知</string>
+    <string name="search_interception_record">查看拦截记录</string>
+    <string name="interception_time">拦截时间:%1$s</string>
+    <string name="interception_number">拦截号码:%1$s</string>
 </resources>

@@ -3,8 +3,10 @@ package com.interceptionphonetool.service;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.telephony.PhoneStateListener;
@@ -12,7 +14,9 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.interceptionphonetool.R;
+import com.interceptionphonetool.binder.RemoteServiceBinder;
 import com.interceptionphonetool.home.entity.Phone;
+import com.interceptionphonetool.home.entity.Record;
 import com.interceptionphonetool.utils.DatabaseManager;
 import com.interceptionphonetool.utils.StringUtils;
 
@@ -33,7 +37,7 @@ public class LocalService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        listenerTelephony();
+        bindService(new Intent(this, RemoteService.class), mServiceConnect, Context.BIND_IMPORTANT);
     }
 
     private void listenerTelephony() {
@@ -42,10 +46,16 @@ public class LocalService extends Service {
         mTelephonyManager.listen(mPhoneListener, PhoneStateListener.LISTEN_CALL_STATE);
     }
 
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        listenerTelephony();
+        return START_STICKY;
+    }
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return new RemoteServiceBinder();
     }
 
     private class TelephonyListener extends PhoneStateListener {
@@ -61,6 +71,7 @@ public class LocalService extends Service {
                         Log.e(TAG, "need interception");
                         finishCall();
                         sendNotification(incomingNumber);
+                        addRecord(incomingNumber);
                     }
                     break;
             }
@@ -102,6 +113,24 @@ public class LocalService extends Service {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(NOTIFICATION_ID, notification);
     }
+
+    private void addRecord(String number){
+        Record record = new Record();
+        record.setNumber(number);
+        DatabaseManager.getInstance().insertRecord(record);
+    }
+
+    private ServiceConnection mServiceConnect = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            startService(new Intent(LocalService.this, RemoteService.class));
+            bindService(new Intent(LocalService.this, RemoteService.class), mServiceConnect, Context.BIND_IMPORTANT);
+        }
+    };
 
     @Override
     public void onDestroy() {

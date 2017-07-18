@@ -28,6 +28,8 @@
             android:enabled="true"
             android:process=":remote" />
         <service android:name=".service.LocalService" />
+
+        <activity android:name=".home.view.RecordListActivity"/>
     </application>
 
 </manifest>

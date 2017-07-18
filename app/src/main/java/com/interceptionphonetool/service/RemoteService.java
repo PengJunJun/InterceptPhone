@@ -2,6 +2,7 @@ package com.interceptionphonetool.service;
 
 import android.app.Service;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
@@ -21,7 +22,7 @@ public class RemoteService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        startLocalService();
+        bindService(new Intent(this, LocalService.class), mLocalServiceConnection, Context.BIND_IMPORTANT);
     }
 
     @Nullable
@@ -30,9 +31,9 @@ public class RemoteService extends Service {
         return new RemoteServiceBinder();
     }
 
-    private void startLocalService() {
-        Intent intent = new Intent(this, LocalService.class);
-        bindService(intent, mLocalServiceConnection, BIND_AUTO_CREATE);
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return START_STICKY;
     }
 
     private ServiceConnection mLocalServiceConnection = new ServiceConnection() {
@@ -44,7 +45,8 @@ public class RemoteService extends Service {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             Log.e(TAG, "remote service disconnection");
-            startLocalService();
+            startService(new Intent(RemoteService.this, LocalService.class));
+            bindService(new Intent(RemoteService.this, LocalService.class), mLocalServiceConnection, Context.BIND_IMPORTANT);
         }
     };
 }
